@@ -1,13 +1,16 @@
 import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
 import { database } from './database/db';
 import { User } from './database/models/user.model';
 
 const app = express();
 
+app.use(bodyParser.json());
+
 app.listen(3000);
 
 app.get('/',(req,res)=>{
-    res.send('Get teste');
+    res.send('Home');
 })
 
 //Conexão com o Postgres
@@ -23,19 +26,32 @@ async function autenticacao() {
 autenticacao();
 
 //Cadastrando Usuário
-async function cadastrandoUsuario(){
+async function cadastrandoUsuario(req: Request, res:Response){
     const cadastrarUsuario = await User.create({
-        nome: 'Andreza',
-        email:'andreza@gmail.com'
+        nome: req.body.nome,
+        email: req.body.email
     })
+    res.json(cadastrarUsuario);
 }
-//cadastrandoUsuario();
+app.post('/cadastrar',cadastrandoUsuario)
 
-//Consultando Usuário Cadastrados
+//Consultando Usuário
 
-async function conusltaUsuariosCadastrados(req:Request,res:Response) {
-    const usuariosCadastrados = await User.findAll();
-    res.json(usuariosCadastrados);
+async function consultaUsuariosCadastrados(req:Request,res:Response) {
+    if (!req.query.nome) {
+        const usuariosCadastrados = await User.findAll();
+        res.json(usuariosCadastrados);
+    } else {
+        const usuarioPesquisado = await User.findAll({
+            where:{
+                nome: req.query.nome
+            }
+        });
+        res.json(usuarioPesquisado);
+    } 
+    
 }
-app.get('/usuarios',conusltaUsuariosCadastrados);
+app.get('/usuarios',consultaUsuariosCadastrados);
+
+
 
