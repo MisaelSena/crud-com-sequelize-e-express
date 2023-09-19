@@ -1,3 +1,8 @@
+/*
+    Este foi apenas um CRUD simples. O projeto principal estará em melhor qualidade 
+    no meu repositório https://github.com/MisaelSena/ como um sistema de classificados 
+    de anúncios de casas e apartementos para aluguel.
+*/
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { database } from './database/db';
@@ -36,7 +41,6 @@ async function cadastrandoUsuario(req: Request, res:Response){
 app.post('/cadastrar',cadastrandoUsuario)
 
 //Consultando Usuário
-
 async function consultaUsuariosCadastrados(req:Request,res:Response) {
     if (!req.query.nome) {
         const usuariosCadastrados = await User.findAll();
@@ -53,5 +57,27 @@ async function consultaUsuariosCadastrados(req:Request,res:Response) {
 }
 app.get('/usuarios',consultaUsuariosCadastrados);
 
+//Atualizar usuário
+async function atualizarUsuario(req:Request, res:Response) {
+    const { id } = req.params;
+    const usuarioAtualizar = await User.findByPk(id);
+    const novoEmail = req.body.email;
+    usuarioAtualizar.email = novoEmail;
 
+    await usuarioAtualizar?.save();
+
+    res.json(usuarioAtualizar);
+}
+app.put('/atualizar/:id',atualizarUsuario);
+
+//Deletar Usuário
+
+async function deletarUsuario(req:Request, res:Response) {
+    const { id } = req.params;
+    const usuarioADeletar = await User.findByPk(id);
+
+    usuarioADeletar?.destroy();
+    res.json();
+}
+app.delete('/deletar/:id',deletarUsuario);
 
